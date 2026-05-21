@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<complianceScan benchmark="Synthetic Windows Server STIG" profile="Synthetic Baseline" host="lab-win-endpoint-01" scanDate="2026-05-01">
+  <rule id="SYN-AC-001" severity="high" category="CAT I">
+    <title>Account lockout threshold is not configured</title>
+    <status>fail</status>
+    <check>Verify local account lockout threshold is configured.</check>
+    <remediation>Configure account lockout threshold according to organizational policy.</remediation>
+  </rule>
+  <rule id="SYN-AU-002" severity="medium" category="CAT II">
+    <title>Audit policy does not capture logon events</title>
+    <status>fail</status>
+    <check>Verify success and failure auditing for logon events.</check>
+    <remediation>Enable audit policy for logon success and failure events.</remediation>
+  </rule>
+  <rule id="SYN-FW-003" severity="high" category="CAT I">
+    <title>Host firewall is not enabled for all profiles</title>
+    <status>fail</status>
+    <check>Verify firewall status for domain, private, and public profiles.</check>
+    <remediation>Enable host firewall for all network profiles.</remediation>
+  </rule>
+  <rule id="SYN-SV-004" severity="low" category="CAT III">
+    <title>Unnecessary service is enabled</title>
+    <status>fail</status>
+    <check>Verify non-essential services are disabled or documented.</check>
+    <remediation>Disable unnecessary services or document business justification.</remediation>
+  </rule>
+  <rule id="SYN-BL-005" severity="medium" category="CAT II">
+    <title>Volume encryption status is not documented</title>
+    <status>pass</status>
+    <check>Verify encryption status is captured for protected volumes.</check>
+    <remediation>Document encryption status and remediation plan for unprotected volumes.</remediation>
+  </rule>
+</complianceScan>

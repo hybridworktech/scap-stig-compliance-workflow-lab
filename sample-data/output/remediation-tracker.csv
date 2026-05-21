@@ -1,0 +1,6 @@
+﻿"Host","RuleId","Category","Severity","Status","Trend","Owner","DueDate","Title","Remediation"
+"lab-win-endpoint-01","SYN-AC-001","CAT I","high","pass","remediated","compliance-owner","planned-review","Account lockout threshold is not configured","Configure account lockout threshold according to organizational policy."
+"lab-win-endpoint-01","SYN-FW-003","CAT I","high","pass","remediated","compliance-owner","planned-review","Host firewall is not enabled for all profiles","Enable host firewall for all network profiles."
+"lab-win-endpoint-01","SYN-AU-002","CAT II","medium","pass","remediated","compliance-owner","planned-review","Audit policy does not capture logon events","Enable audit policy for logon success and failure events."
+"lab-win-endpoint-01","SYN-BL-005","CAT II","medium","pass","unchanged-pass","compliance-owner","planned-review","Volume encryption status is not documented","Document encryption status and remediation plan for unprotected volumes."
+"lab-win-endpoint-01","SYN-SV-004","CAT III","low","fail","still-open","compliance-owner","planned-review","Unnecessary service is enabled","Disable unnecessary services or document business justification."

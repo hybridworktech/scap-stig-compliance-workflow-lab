@@ -1,0 +1,73 @@
+﻿<svg xmlns="http://www.w3.org/2000/svg" width="1180" height="310" viewBox="0 0 1180 310" role="img" aria-labelledby="title desc">
+  <title id="title">SCAP/STIG compliance workflow diagram</title>
+  <desc id="desc">Synthetic XML flows through a PowerShell parser into normalized findings, a CSV tracker, dashboard, and runbooks.</desc>
+  <defs>
+    <filter id="shadow" x="-10%" y="-20%" width="120%" height="140%">
+      <feDropShadow dx="0" dy="10" stdDeviation="10" flood-color="#172026" flood-opacity=".12"/>
+    </filter>
+    <marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M2,2 L10,6 L2,10 Z" fill="#006d77"/>
+    </marker>
+  </defs>
+  <rect width="1180" height="310" rx="18" fill="#f7f9fa"/>
+  <text x="38" y="44" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="700" fill="#172026">After-Scan Evidence Workflow</text>
+  <text x="38" y="70" font-family="Segoe UI, Arial, sans-serif" font-size="14" fill="#62727c">From synthetic scan-style results to remediation evidence and stakeholder reporting.</text>
+
+  <g font-family="Segoe UI, Arial, sans-serif" filter="url(#shadow)">
+    <g transform="translate(38 112)">
+      <rect width="160" height="104" rx="10" fill="#ffffff" stroke="#d8e0e5"/>
+      <circle cx="24" cy="25" r="7" fill="#006d77"/>
+      <text x="42" y="31" font-size="14" font-weight="700" fill="#172026">Synthetic XML</text>
+      <text x="18" y="60" font-size="12" fill="#62727c">Before and after</text>
+      <text x="18" y="78" font-size="12" fill="#62727c">scan-style inputs</text>
+    </g>
+    <g transform="translate(236 112)">
+      <rect width="160" height="104" rx="10" fill="#ffffff" stroke="#d8e0e5"/>
+      <circle cx="24" cy="25" r="7" fill="#006d77"/>
+      <text x="42" y="31" font-size="14" font-weight="700" fill="#172026">PowerShell</text>
+      <text x="18" y="60" font-size="12" fill="#62727c">Parser reads rules</text>
+      <text x="18" y="78" font-size="12" fill="#62727c">and statuses</text>
+    </g>
+    <g transform="translate(434 112)">
+      <rect width="160" height="104" rx="10" fill="#ffffff" stroke="#d8e0e5"/>
+      <circle cx="24" cy="25" r="7" fill="#006d77"/>
+      <text x="42" y="31" font-size="14" font-weight="700" fill="#172026">Normalize</text>
+      <text x="18" y="60" font-size="12" fill="#62727c">Severity, category,</text>
+      <text x="18" y="78" font-size="12" fill="#62727c">trend, remediation</text>
+    </g>
+    <g transform="translate(632 112)">
+      <rect width="160" height="104" rx="10" fill="#ffffff" stroke="#d8e0e5"/>
+      <circle cx="24" cy="25" r="7" fill="#1f7a4d"/>
+      <text x="42" y="31" font-size="14" font-weight="700" fill="#172026">Tracker</text>
+      <text x="18" y="60" font-size="12" fill="#62727c">CSV output for</text>
+      <text x="18" y="78" font-size="12" fill="#62727c">remediation work</text>
+    </g>
+    <g transform="translate(830 112)">
+      <rect width="160" height="104" rx="10" fill="#ffffff" stroke="#d8e0e5"/>
+      <circle cx="24" cy="25" r="7" fill="#1f7a4d"/>
+      <text x="42" y="31" font-size="14" font-weight="700" fill="#172026">Dashboard</text>
+      <text x="18" y="60" font-size="12" fill="#62727c">Metrics, budget,</text>
+      <text x="18" y="78" font-size="12" fill="#62727c">redaction audit</text>
+    </g>
+    <g transform="translate(1028 112)">
+      <rect width="114" height="104" rx="10" fill="#ffffff" stroke="#d8e0e5"/>
+      <circle cx="24" cy="25" r="7" fill="#1f7a4d"/>
+      <text x="42" y="31" font-size="14" font-weight="700" fill="#172026">Runbooks</text>
+      <text x="18" y="60" font-size="12" fill="#62727c">Open finding</text>
+      <text x="18" y="78" font-size="12" fill="#62727c">guidance</text>
+    </g>
+  </g>
+
+  <g stroke="#006d77" stroke-width="2.5" marker-end="url(#arrow)" fill="none">
+    <path d="M204 164 H228"/>
+    <path d="M402 164 H426"/>
+    <path d="M600 164 H624"/>
+    <path d="M798 164 H822"/>
+    <path d="M996 164 H1020"/>
+  </g>
+
+  <g font-family="Segoe UI, Arial, sans-serif">
+    <rect x="38" y="248" width="1104" height="34" rx="8" fill="#e7f3f2" stroke="#c6dddd"/>
+    <text x="56" y="270" font-size="13" fill="#24444a">Privacy boundary: generated for portfolio use with synthetic findings, sanitized Windows context, and redaction checks before sharing.</text>
+  </g>
+</svg>
