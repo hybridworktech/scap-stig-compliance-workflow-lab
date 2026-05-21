@@ -1,0 +1,837 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SCAP/STIG Compliance Automation Lab</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #172026;
+      --muted: #62727c;
+      --line: #d8e0e5;
+      --soft: #f6f8f9;
+      --panel: #ffffff;
+      --accent: #006d77;
+      --accent-soft: #e7f3f2;
+      --risk: #b42318;
+      --risk-soft: #fff0ed;
+      --ok: #1f7a4d;
+      --ok-soft: #eaf6ef;
+      --warn: #9a5b00;
+      --warn-soft: #fff7e8;
+      --shadow: 0 18px 44px rgba(23, 32, 38, .08);
+      --shadow-soft: 0 10px 24px rgba(23, 32, 38, .06);
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: Segoe UI, Arial, sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 8% 0%, rgba(0, 109, 119, .09), transparent 30%),
+        linear-gradient(180deg, #f7fafb 0, #ffffff 320px);
+    }
+    main {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 22px 20px 56px;
+    }
+    header {
+      display: grid;
+      grid-template-columns: minmax(0, 1.4fr) minmax(280px, 0.6fr);
+      gap: 24px;
+      align-items: end;
+      border-bottom: 1px solid var(--line);
+      padding-bottom: 24px;
+      margin-bottom: 22px;
+    }
+    h1 {
+      font-size: 40px;
+      line-height: 1.15;
+      margin: 8px 0 10px;
+      letter-spacing: 0;
+      max-width: 780px;
+    }
+    p {
+      color: var(--muted);
+      margin: 0;
+      line-height: 1.5;
+    }
+    .eyebrow {
+      color: var(--accent);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+    .privacy-box {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      padding: 16px;
+      box-shadow: var(--shadow-soft);
+    }
+    .privacy-box strong {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+    .privacy-box ul {
+      margin: 0;
+      padding-left: 18px;
+      color: var(--muted);
+      line-height: 1.5;
+      font-size: 13px;
+    }
+    .status-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 16px;
+    }
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      min-height: 30px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 6px 10px;
+      background: #fff;
+      color: #2f424b;
+      font-size: 12px;
+      font-weight: 700;
+      box-shadow: 0 6px 14px rgba(23, 32, 38, .05);
+    }
+    .status-badge.good {
+      border-color: #b8dec7;
+      background: var(--ok-soft);
+      color: var(--ok);
+    }
+    .status-badge.scope {
+      border-color: #b9dadd;
+      background: var(--accent-soft);
+      color: #004f56;
+    }
+    .top-nav {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+      margin: 18px 0 4px;
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, .92);
+      backdrop-filter: blur(10px);
+      box-shadow: var(--shadow-soft);
+    }
+    .top-nav a {
+      color: #2f424b;
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 8px 10px;
+      border-radius: 8px;
+    }
+    .top-nav a:hover {
+      background: var(--accent-soft);
+      color: #004f56;
+    }
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin: 24px 0;
+    }
+    .metric {
+      position: relative;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 16px;
+      background: var(--panel);
+      min-height: 118px;
+      box-shadow: var(--shadow-soft);
+    }
+    .metric::before {
+      content: "";
+      position: absolute;
+      inset: 0 auto 0 0;
+      width: 4px;
+      background: var(--accent);
+    }
+    .metric.risk-card::before { background: var(--risk); }
+    .metric.ok-card::before { background: var(--ok); }
+    .metric.pass-card::before { background: var(--ok); }
+    .metric.fail-card::before { background: var(--risk); }
+    }
+    .label {
+      color: var(--muted);
+      font-size: 13px;
+      margin-bottom: 8px;
+    }
+    .value {
+      font-size: 28px;
+      font-weight: 700;
+    }
+    .subvalue {
+      color: var(--muted);
+      font-size: 13px;
+      margin-top: 8px;
+    }
+    .ok { color: var(--ok); }
+    .risk { color: var(--risk); }
+    .grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(300px, .45fr);
+      gap: 18px;
+    }
+    section {
+      margin-top: 28px;
+      scroll-margin-top: 86px;
+    }
+    .panel {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      padding: 20px;
+      box-shadow: var(--shadow-soft);
+    }
+    h2 {
+      font-size: 20px;
+      margin: 0 0 12px;
+    }
+    h3 {
+      font-size: 15px;
+      margin: 0 0 10px;
+    }
+    .flow {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 14px;
+    }
+    .step {
+      position: relative;
+      min-height: 84px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: linear-gradient(180deg, #ffffff, var(--soft));
+      padding: 12px;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      font-weight: 600;
+    }
+    .step::before {
+      content: "";
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: var(--accent);
+    }
+    .workflow-image {
+      display: block;
+      width: 100%;
+      height: auto;
+      margin-top: 16px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--soft);
+    }
+    .bars {
+      display: grid;
+      gap: 14px;
+    }
+    .bar-row {
+      display: grid;
+      gap: 6px;
+    }
+    .bar-label {
+      display: flex;
+      justify-content: space-between;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .bar-track {
+      height: 14px;
+      border-radius: 999px;
+      overflow: hidden;
+      background: #e6ecef;
+      box-shadow: inset 0 1px 2px rgba(23, 32, 38, .12);
+    }
+    .bar-fill {
+      height: 100%;
+      border-radius: 999px;
+      background: var(--accent);
+    }
+    .bar-fill.before { background: var(--risk); width: 20%; }
+    .bar-fill.after { background: var(--ok); width: 80%; }
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 12px 0;
+    }
+    button {
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--ink);
+      border-radius: 8px;
+      padding: 8px 10px;
+      font: inherit;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    button.active {
+      border-color: var(--accent);
+      background: var(--accent-soft);
+      color: #004f56;
+      font-weight: 700;
+    }
+    .field-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 12px;
+      align-items: center;
+      margin: 12px 0;
+    }
+    input[type="search"] {
+      width: 100%;
+      min-height: 40px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 8px 10px;
+      color: var(--ink);
+      font: inherit;
+      font-size: 14px;
+      background: #fff;
+    }
+    input[type="range"] {
+      width: min(360px, 100%);
+      accent-color: var(--accent);
+    }
+    .slider-card {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(220px, .35fr);
+      gap: 16px;
+      align-items: center;
+      margin: 14px 0;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--soft);
+    }
+    .slider-value {
+      font-size: 26px;
+      font-weight: 800;
+      color: var(--accent);
+      text-align: right;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow: hidden;
+      background: #fff;
+    }
+    th, td {
+      text-align: left;
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--line);
+      vertical-align: top;
+      font-size: 14px;
+    }
+    th {
+      background: #eef4f5;
+      color: #2f424b;
+    }
+    tr:last-child td {
+      border-bottom: 0;
+    }
+    tr:nth-child(even) td {
+      background: #fbfcfc;
+    }
+    td span {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 3px;
+    }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      min-height: 24px;
+      border-radius: 999px;
+      padding: 3px 9px;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+    .pill.pass {
+      color: var(--ok);
+      background: var(--ok-soft);
+    }
+    .pill.fail {
+      color: var(--risk);
+      background: var(--risk-soft);
+    }
+    .artifact-list {
+      display: grid;
+      gap: 8px;
+      margin-top: 12px;
+    }
+    .artifact {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 10px 12px;
+      background: var(--soft);
+      font-size: 13px;
+    }
+    .artifact code {
+      color: var(--accent);
+      font-weight: 700;
+    }
+    .review {
+      display: grid;
+      grid-template-columns: minmax(0, .8fr) minmax(280px, .2fr);
+      gap: 16px;
+      align-items: start;
+    }
+    .review-text {
+      color: #2f424b;
+      font-size: 15px;
+      line-height: 1.65;
+    }
+    .review-aside {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--accent-soft);
+      padding: 14px;
+    }
+    .review-aside strong {
+      display: block;
+      color: #004f56;
+      margin-bottom: 8px;
+    }
+    .review-aside p {
+      font-size: 13px;
+    }
+    .note {
+      margin-top: 24px;
+      padding: 14px 16px;
+      border-left: 4px solid var(--accent);
+      background: #edf7f7;
+      color: #24444a;
+      border-radius: 0 8px 8px 0;
+    }
+    .compact-note {
+      margin-top: 14px;
+      padding: 12px 14px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--soft);
+      color: #2f424b;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+    .compact-note code {
+      color: var(--accent);
+      font-weight: 700;
+    }
+    .table-wrap {
+      overflow-x: auto;
+      border-radius: 8px;
+    }
+    .hidden { display: none; }
+    @media (max-width: 900px) {
+      header, .grid {
+        grid-template-columns: 1fr;
+      }
+      .metrics {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      .flow {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      .review {
+        grid-template-columns: 1fr;
+      }
+      .slider-card, .field-row {
+        grid-template-columns: 1fr;
+      }
+      .slider-value {
+        text-align: left;
+      }
+      .top-nav {
+        position: static;
+      }
+    }
+    @media (max-width: 560px) {
+      main {
+        padding-inline: 14px;
+      }
+      h1 {
+        font-size: 30px;
+      }
+      .metrics {
+        grid-template-columns: 1fr;
+      }
+      th, td {
+        font-size: 13px;
+        padding: 9px;
+      }
+      .artifact {
+        display: block;
+      }
+      .artifact code {
+        display: block;
+        margin-top: 4px;
+        white-space: normal;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <div>
+        <div class="eyebrow">Security Compliance Automation Portfolio</div>
+        <h1>SCAP/STIG Compliance Automation Lab</h1>
+        <p>A free, standalone dashboard generated from synthetic SCAP/STIG-style data. It shows how raw compliance findings become remediation tracking, before/after reporting, and evidence-ready runbooks.</p>
+        <div class="status-badges" aria-label="Project status">
+          <span class="status-badge">Portfolio Demo</span>
+          <span class="status-badge scope">After-Scan Reporting Layer</span>
+          <span class="status-badge good">Evidence Package: Share-Ready</span>
+          <span class="status-badge">Generated by: Local PowerShell Engine</span>
+          <span class="status-badge">Last Generated: 2026-05-20 22:37 -07:00</span>
+        </div>
+      </div>
+      <div class="privacy-box">
+        <strong>Privacy-safe by design</strong>
+        <ul>
+          <li>No real hostnames, IPs, scan IDs, client data, or usernames</li>
+          <li>No founder ideas, proprietary product concepts, or production architecture</li>
+          <li>Built for employer review using synthetic demo data only</li>
+        </ul>
+      </div>
+    </header>
+
+    <nav class="top-nav" aria-label="Dashboard sections">
+      <a href="#score">Score</a>
+      <a href="#workflow">Workflow</a>
+      <a href="#runner">Runner</a>
+      <a href="#summary">LLM Review</a>
+      <a href="#pitch">Pitch</a>
+      <a href="#budget">Budget</a>
+      <a href="#redaction">Redaction</a>
+      <a href="#windows">Windows</a>
+      <a href="#tracker">Tracker</a>
+      <a href="#artifacts">Artifacts</a>
+    </nav>
+
+    <div class="metrics">
+      <div class="metric risk-card">
+        <div class="label">Before Compliance</div>
+        <div class="value risk">20%</div>
+        <div class="subvalue">4 failed controls</div>
+      </div>
+      <div class="metric ok-card">
+        <div class="label">After Compliance</div>
+        <div class="value ok">80%</div>
+        <div class="subvalue">+60 point improvement</div>
+      </div>
+      <div class="metric ok-card">
+        <div class="label">Remediated Findings</div>
+        <div class="value ok">3</div>
+        <div class="subvalue">Closed between scans</div>
+      </div>
+      <div class="metric">
+        <div class="label">CAT I Open</div>
+        <div class="value">0</div>
+        <div class="subvalue">Highest risk remaining</div>
+      </div>
+    </div>
+
+    <div class="grid">
+      <section class="panel" id="score">
+        <h2>Before / After Score</h2>
+        <div class="bars">
+          <div class="bar-row">
+            <div class="bar-label"><span>Before scan</span><strong>20%</strong></div>
+            <div class="bar-track"><div class="bar-fill before"></div></div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label"><span>After scan</span><strong>80%</strong></div>
+            <div class="bar-track"><div class="bar-fill after"></div></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>Stakeholder Signal</h2>
+        <p>This dashboard demonstrates PowerShell automation, STIG/SCAP workflow understanding, remediation prioritization, reporting, and careful handling of sensitive compliance work.</p>
+      </section>
+    </div>
+
+    <section class="panel" id="workflow">
+      <h2>Progression Workflow</h2>
+      <p>Raw technical output is converted into artifacts security, infrastructure, and compliance teams can act on.</p>
+      <img class="workflow-image" src="workflow-diagram.svg" alt="Workflow diagram showing synthetic XML parsed by PowerShell into normalized findings, tracker, dashboard, and runbooks.">
+    </section>
+
+    <section class="panel" id="runner">
+      <h2>Job Runner Workflow</h2>
+      <p>The dashboard is the reporting layer. The PowerShell script is the engine that runs the compliance job and regenerates the evidence package.</p>
+      <div class="flow">
+        <div class="step">Input: before scan XML</div>
+        <div class="step">Input: after scan XML</div>
+        <div class="step">Run PowerShell engine</div>
+        <div class="step">Compare control status</div>
+        <div class="step">Score and classify trends</div>
+        <div class="step">Generate evidence outputs</div>
+      </div>
+      <div class="compact-note">Run: <code>.\scripts\Invoke-ComplianceEngine.ps1</code> | Inputs: <code>sample-data/</code> | Outputs: <code>output/</code> | Dashboard remains report-only.</div>
+    </section>
+
+    <section class="panel" id="summary">
+      <h2>LLM Summary Review</h2>
+      <div class="review">
+        <p class="review-text">AI-assisted review summarizes the synthetic findings, compliance improvement from 20% to 80%, remaining CAT III work, and generated evidence outputs. The review is bounded to source data and is not a security attestation.</p>
+        <div class="review-aside">
+          <strong>Review boundary</strong>
+          <p>This summary is generated from synthetic demo data. It is a portfolio explanation, not a production security attestation.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel" id="pitch">
+      <h2>Employer Value Proposition</h2>
+      <p class="review-text">I built this privacy-safe SCAP/STIG compliance automation lab to show how I approach infrastructure work: automate the repeatable parts, protect sensitive data, and turn raw technical findings into clear engineering action. The project uses PowerShell, synthetic benchmark-style scan data, Windows read-only validation checks, remediation tracking, before/after reporting, and generated runbooks. It is especially relevant to DevOps, cloud/platform engineering, security automation, GRC, government contracting, and eDiscovery/legal-tech infrastructure roles.</p>
+      <div class="artifact-list">
+        <div class="artifact"><span>What it proves</span><code>automation + security judgment</code></div>
+        <div class="artifact"><span>Why it is safe to share</span><code>synthetic data + redacted identity</code></div>
+        <div class="artifact"><span>Best-fit roles</span><code>DevOps, platform, security automation</code></div>
+      </div>
+    </section>
+
+    <section class="panel" id="budget">
+      <h2>Proposed Remediation Budget</h2>
+      <p>This synthetic planning estimate shows how findings could be translated into remediation effort, evidence capture, and reporting work. It is for portfolio demonstration only, not a client quote.</p>
+      <div class="slider-card">
+        <div>
+          <h3>Live Planning Rate</h3>
+          <p>Adjust the multiplier to show how remediation planning changes with different consulting rates.</p>
+          <input id="rateMultiplier" type="range" min="75" max="150" value="100" step="5" aria-label="Budget rate multiplier">
+        </div>
+        <div class="slider-value"><span id="rateMultiplierLabel">100</span>%</div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <tr><th>Workstream</th><th>Estimated Hours</th><th>Planning Rate</th><th>Estimated Cost</th></tr>
+          <tr data-budget-row data-hours="4" data-rate="95"><td><strong>CAT I remediation validation</strong><span>Confirm high-risk controls remain closed and capture evidence</span></td><td>4</td><td><span class="rate-cell">$95/hr</span></td><td><strong class="cost-cell">$380</strong></td></tr>
+<tr data-budget-row data-hours="2" data-rate="85"><td><strong>CAT II remediation validation</strong><span>Review medium-risk fixes, update tracker, and document evidence</span></td><td>2</td><td><span class="rate-cell">$85/hr</span></td><td><strong class="cost-cell">$170</strong></td></tr>
+<tr data-budget-row data-hours="1" data-rate="75"><td><strong>CAT III cleanup and exception review</strong><span>Triage remaining low-risk finding and prepare exception notes if needed</span></td><td>1</td><td><span class="rate-cell">$75/hr</span></td><td><strong class="cost-cell">$75</strong></td></tr>
+<tr data-budget-row data-hours="2" data-rate="85"><td><strong>Evidence pack and reporting</strong><span>Package summary, tracker, Windows validation, and runbook outputs</span></td><td>2</td><td><span class="rate-cell">$85/hr</span></td><td><strong class="cost-cell">$170</strong></td></tr>
+          <tr><td><strong>Total planning estimate</strong><span>Synthetic estimate based on demo findings</span></td><td></td><td></td><td><strong id="budgetTotal">$795</strong></td></tr>
+        </table>
+      </div>
+      <div class="note">
+        Budget assumption: rates and hours are placeholders used to demonstrate consulting-style scoping, prioritization, and audit planning.
+      </div>
+    </section>
+
+    <section class="panel" id="redaction">
+      <h2>Redaction Audit</h2>
+      <p>The engine scans generated report content for common sensitive-data patterns before the dashboard is shared. The examples below use synthetic placeholders to demonstrate what redaction would look like.</p>
+      <div class="metrics" style="margin-top:14px;">
+        <div class="metric pass-card">
+          <div class="label">Audit Status</div>
+          <div class="value">Passed</div>
+          <div class="subvalue">0 detected matches in generated outputs</div>
+        </div>
+        <div class="metric ok-card">
+          <div class="label">Synthetic Redaction Examples</div>
+          <div class="value">2</div>
+          <div class="subvalue">Demonstrates privacy-safe masking</div>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <tr><th>Pattern</th><th>Matches</th><th>Status</th></tr>
+          <tr><td>Email addresses</td><td>0</td><td><span class="pill pass">clear</span></td></tr>
+<tr><td>IPv4 addresses</td><td>0</td><td><span class="pill pass">clear</span></td></tr>
+<tr><td>Windows user paths</td><td>0</td><td><span class="pill pass">clear</span></td></tr>
+<tr><td>Internal domain hints</td><td>0</td><td><span class="pill pass">clear</span></td></tr>
+        </table>
+      </div>
+      <h3 style="margin-top:16px;">Redaction Examples</h3>
+      <div class="table-wrap">
+        <table>
+          <tr><th>Pattern</th><th>Synthetic Original</th><th>Masked Output</th><th>Status</th></tr>
+          <tr><td>Email addresses<span>Synthetic owner/contact field</span></td><td><code>analyst@example.invalid</code></td><td><code>[redacted-email]</code></td><td><span class="pill pass">redacted</span></td></tr>
+<tr><td>Windows user paths<span>Synthetic local export path</span></td><td><code>C:\Users\example-user\Documents\scan-output</code></td><td><code>[redacted-user-path]</code></td><td><span class="pill pass">redacted</span></td></tr>
+        </table>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Impact by Severity</h2>
+      <div class="table-wrap">
+        <table>
+          <tr><th>Risk Category</th><th>Before</th><th>After</th><th>Change</th></tr>
+          <tr><td>CAT I</td><td>2</td><td>0</td><td>-2 reduced</td></tr>
+<tr><td>CAT II</td><td>1</td><td>0</td><td>-1 reduced</td></tr>
+<tr><td>CAT III</td><td>1</td><td>1</td><td>0 unchanged</td></tr>
+        </table>
+      </div>
+    </section>
+
+    <section class="panel" id="windows">
+      <h2>Windows Validation Layer</h2>
+      <p>This section uses your local Windows environment for safe, read-only validation context. The SCAP/STIG findings above remain synthetic so the project can be shared without exposing private system details.</p>
+      <h3>Local Windows Environment</h3>
+      <div class="table-wrap">
+        <table>
+          <tr><th>Field</th><th>Sanitized Value</th></tr>
+          <tr><td>Operating system</td><td>Windows 10 Home</td></tr>
+<tr><td>Windows version</td><td>25H2</td></tr>
+<tr><td>Windows build</td><td>26200</td></tr>
+<tr><td>PowerShell version</td><td>5.1.26100.8115</td></tr>
+<tr><td>Machine identity</td><td>Redacted for portfolio safety</td></tr>
+        </table>
+      </div>
+      <h3 style="margin-top:16px;">Read-Only Evidence Checks</h3>
+      <div class="table-wrap">
+        <table>
+          <tr><th>Area</th><th>Check</th><th>Status</th><th>Evidence Use</th></tr>
+          <tr><td><strong>Firewall</strong></td><td>Firewall profile command available<span>Get-NetFirewallProfile</span></td><td><span class="pill pass">available</span></td><td>Supports read-only validation of domain, private, and public firewall profiles.</td></tr>
+<tr><td><strong>Identity</strong></td><td>Local account inventory command available<span>Get-LocalUser</span></td><td><span class="pill pass">available</span></td><td>Supports read-only review of local account posture without modifying users.</td></tr>
+<tr><td><strong>Audit</strong></td><td>Audit policy command available<span>auditpol.exe</span></td><td><span class="pill pass">available</span></td><td>Supports evidence capture for audit policy checks.</td></tr>
+<tr><td><strong>Encryption</strong></td><td>BitLocker command available<span>Get-BitLockerVolume</span></td><td><span class="pill pass">available</span></td><td>Supports read-only validation of volume encryption visibility.</td></tr>
+        </table>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Open Findings</h2>
+      <div class="table-wrap">
+        <table>
+          <tr><th>Rule</th><th>Category</th><th>Severity</th><th>Title</th></tr>
+          <tr><td><strong>SYN-SV-004</strong></td><td>CAT III</td><td>low</td><td>Unnecessary service is enabled</td></tr>
+        </table>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Remediation Tracker</h2>
+      <p>Use the filters to show how the engine separates closed, open, and unchanged controls.</p>
+      <div class="field-row">
+        <input id="trackerSearch" type="search" placeholder="Search rule, finding, status, trend, or remediation" aria-label="Search remediation tracker">
+      </div>
+      <div class="controls" aria-label="Tracker filters">
+        <button class="active" data-filter="all" type="button">All</button>
+        <button data-filter="remediated" type="button">Remediated</button>
+        <button data-filter="still-open" type="button">Still Open</button>
+        <button data-filter="unchanged-pass" type="button">Unchanged Pass</button>
+      </div>
+      <div class="table-wrap">
+        <table id="tracker">
+          <tr><th>Rule</th><th>Finding</th><th>Status</th><th>Trend</th><th>Remediation</th></tr>
+          <tr data-category="CAT I" data-status="pass" data-trend="remediated"><td><strong>SYN-AC-001</strong><span>CAT I</span></td><td>Account lockout threshold is not configured</td><td><span class="pill pass">pass</span></td><td>remediated</td><td>Configure account lockout threshold according to organizational policy.</td></tr>
+<tr data-category="CAT I" data-status="pass" data-trend="remediated"><td><strong>SYN-FW-003</strong><span>CAT I</span></td><td>Host firewall is not enabled for all profiles</td><td><span class="pill pass">pass</span></td><td>remediated</td><td>Enable host firewall for all network profiles.</td></tr>
+<tr data-category="CAT II" data-status="pass" data-trend="remediated"><td><strong>SYN-AU-002</strong><span>CAT II</span></td><td>Audit policy does not capture logon events</td><td><span class="pill pass">pass</span></td><td>remediated</td><td>Enable audit policy for logon success and failure events.</td></tr>
+<tr data-category="CAT II" data-status="pass" data-trend="unchanged-pass"><td><strong>SYN-BL-005</strong><span>CAT II</span></td><td>Volume encryption status is not documented</td><td><span class="pill pass">pass</span></td><td>unchanged-pass</td><td>Document encryption status and remediation plan for unprotected volumes.</td></tr>
+<tr data-category="CAT III" data-status="fail" data-trend="still-open"><td><strong>SYN-SV-004</strong><span>CAT III</span></td><td>Unnecessary service is enabled</td><td><span class="pill fail">fail</span></td><td>still-open</td><td>Disable unnecessary services or document business justification.</td></tr>
+        </table>
+      </div>
+    </section>
+
+    <section class="panel" id="artifacts">
+      <h2>Generated Artifacts</h2>
+      <div class="artifact-list">
+        <div class="artifact"><span>Remediation tracker</span><code>remediation-tracker.csv</code></div>
+        <div class="artifact"><span>Before/after summary</span><code>compliance-summary.md</code></div>
+        <div class="artifact"><span>Portfolio dashboard</span><code>dashboard.html</code></div>
+        <div class="artifact"><span>Open finding runbook</span><code>SYN-SV-004-runbook.md</code></div>
+      </div>
+    </section>
+
+    <div class="note">
+      Project Summary: Built a synthetic SCAP/STIG automation lab that parses benchmark-style findings, prioritizes remediation, and produces auditable reports while protecting sensitive data and proprietary ideas.
+    </div>
+  </main>
+  <script>
+    const buttons = document.querySelectorAll("[data-filter]");
+    const rows = document.querySelectorAll("#tracker tr[data-trend]");
+    const trackerSearch = document.querySelector("#trackerSearch");
+    let activeFilter = "all";
+
+    function applyTrackerFilters() {
+      const query = (trackerSearch?.value || "").trim().toLowerCase();
+      rows.forEach((row) => {
+        const matchesFilter = activeFilter === "all" || row.dataset.trend === activeFilter;
+        const matchesSearch = !query || row.innerText.toLowerCase().includes(query);
+        row.classList.toggle("hidden", !matchesFilter || !matchesSearch);
+      });
+    }
+
+    buttons.forEach((button) => {
+      button.addEventListener("click", () => {
+        activeFilter = button.dataset.filter;
+        buttons.forEach((item) => item.classList.remove("active"));
+        button.classList.add("active");
+        applyTrackerFilters();
+      });
+    });
+
+    trackerSearch?.addEventListener("input", applyTrackerFilters);
+
+    const multiplierInput = document.querySelector("#rateMultiplier");
+    const multiplierLabel = document.querySelector("#rateMultiplierLabel");
+    const budgetTotal = document.querySelector("#budgetTotal");
+    const budgetRows = document.querySelectorAll("[data-budget-row]");
+
+    function formatCurrency(value) {
+      return new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: "USD",
+        maximumFractionDigits: 0
+      }).format(value);
+    }
+
+    function updateBudget() {
+      const multiplier = Number(multiplierInput?.value || 100) / 100;
+      let total = 0;
+      multiplierLabel.textContent = Math.round(multiplier * 100);
+      budgetRows.forEach((row) => {
+        const hours = Number(row.dataset.hours || 0);
+        const baseRate = Number(row.dataset.rate || 0);
+        const adjustedRate = baseRate * multiplier;
+        const cost = hours * adjustedRate;
+        total += cost;
+        row.querySelector(".rate-cell").textContent = formatCurrency(adjustedRate) + "/hr";
+        row.querySelector(".cost-cell").textContent = formatCurrency(cost);
+      });
+      budgetTotal.textContent = formatCurrency(total);
+    }
+
+    multiplierInput?.addEventListener("input", updateBudget);
+    updateBudget();
+  </script>
+</body>
+</html>
